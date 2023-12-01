@@ -12,85 +12,10 @@
 #include <QJsonObject>
 
 
-struct Address{
-
-    QString city;
-
-    QString state;
-
-    QString street;
-
-    QString postalCode;
-
-    void operator<<(const QJsonObject& json){
-
-        city       = json.value("city").toString();
-        state      = json.value("state").toString();
-        street     = json.value("street").toString();
-        postalCode = json.value("postalCode").toString();
-    }
-};
-
-struct PhoneNumbers{
-
-    QString type;
-
-    QString number;
-
-    void operator<<(const QJsonObject& json){
-
-        type   = json.value("type").toString();
-        number = json.value("number").toString();
-    }
-};
-
-struct Users{
-
-    int id;
-
-    int age;
-
-    QString name;
-
-    QString email;
-
-    Address address;
-
-    QList<PhoneNumbers> phoneNumbersList;
-
-    void operator<<(const QJsonObject& json){
-
-        id           = json.value("id").toInt();
-        age          = json.value("age").toInt();
-        name         = json.value("name").toString();
-        email        = json.value("email").toString();
-        address     << json.value("address").toObject();
-
-        const auto& arr = json.value("phoneNumbers").toArray();
-        for(const auto& item : arr){
-            PhoneNumbers i;
-            i << item.toObject();
-            phoneNumbersList << i;
-        }
-    }
-};
-
-struct MainStruct{
-
-    QList<Users> usersList;
-
-    void operator<<(const QJsonObject& json){
+#if 1
 
 
-        const auto& arr = json.value("users").toArray();
-        for(const auto& item : arr){
-            Users i;
-            i << item.toObject();
-            usersList << i;
-        }
-    }
-};
-
+#endif
 
 // ============================
 
@@ -160,8 +85,8 @@ struct StructTemplate
 
                 auto itemType = Tools::toUpperCaseCamelCase(name);
                 subStr += "\n";
-                subStr += table + QString("const auto& arr = json.value(\"%0\").toArray();\n").arg(name);
-                subStr += table + QString("for(const auto& item : arr){ \n");
+                subStr += table + QString("const auto& arr%0 = json.value(\"%0\").toArray();\n").arg(name);
+                subStr += table + QString("for(const auto& item : arr%0){ \n").arg(name);
                 table  += "\t";
                 subStr += table + itemType + QString(" i; \n");
                 subStr += table + QString("i << item.toObject(); \n");
@@ -201,7 +126,7 @@ struct StructTemplate
 
         QMap<QJsonValue::Type,QString> map;
         map.insert(static_cast<QJsonValue::Type>(-1),"int");
-        map.insert(QJsonValue::Null,"Null");
+        map.insert(QJsonValue::Null,"QVariant");
         map.insert(QJsonValue::Bool,"bool");
         map.insert(QJsonValue::Double,"double");
         map.insert(QJsonValue::String,"QString");
