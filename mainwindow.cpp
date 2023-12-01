@@ -100,10 +100,13 @@ void MainWindow::getQtTypeTreeFromJsonObj(const QJsonObject& obj ,const QString&
 
     StructTemplate st;
     st.thiskey = thiskey;
+
+    int len = -1;
     for(const auto &key : obj.keys()){
 
         QString structName = Tools::toUpperCaseCamelCase(key);
         auto type = obj.value(key).type();
+        if(key.length() > len) len = key.length();
 
         if(type == QJsonValue::Object){
             getQtTypeTreeFromJsonObj(obj.value(key).toObject(),structName);
@@ -119,6 +122,15 @@ void MainWindow::getQtTypeTreeFromJsonObj(const QJsonObject& obj ,const QString&
 
         st.data.append({type,key});
     }
+
+    auto sortFunc = [](std::tuple<QJsonValue::Type,QString> a1 ,
+                       std::tuple<QJsonValue::Type,QString> a2){
+        return std::get<1>(a1).length() < std::get<1>(a2).length();
+    };
+
+    qSort(st.data.begin(),st.data.end(),sortFunc);
+
+    st.thisDataKeyLenMax = len;
 
     m_structTemplates.append(st);
 }

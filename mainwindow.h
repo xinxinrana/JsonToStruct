@@ -16,52 +16,56 @@ struct Address{
 
     QString city;
 
-    QString postalCode;
-
     QString state;
 
     QString street;
 
+    QString postalCode;
+
     void operator<<(const QJsonObject& json){
-        city = json.value("city").toString();
+
+        city       = json.value("city").toString();
+        state      = json.value("state").toString();
+        street     = json.value("street").toString();
         postalCode = json.value("postalCode").toString();
-        state = json.value("state").toString();
-        street = json.value("street").toString();
     }
 };
 
 struct PhoneNumbers{
 
-    QString number;
-
     QString type;
 
+    QString number;
+
     void operator<<(const QJsonObject& json){
+
+        type   = json.value("type").toString();
         number = json.value("number").toString();
-        type = json.value("type").toString();
     }
 };
 
 struct Users{
 
-    Address address;
+    int id;
 
-    double age;
+    int age;
+
+    QString name;
 
     QString email;
 
-    double id;
-
-    QString name;
+    Address address;
 
     QList<PhoneNumbers> phoneNumbersList;
 
     void operator<<(const QJsonObject& json){
-        address << json.value("address").toObject();
-        age = json.value("age").toDouble();
-        email = json.value("email").toString();
-        id = json.value("id").toDouble();
-        name = json.value("name").toString();
+
+        id           = json.value("id").toInt();
+        age          = json.value("age").toInt();
+        name         = json.value("name").toString();
+        email        = json.value("email").toString();
+        address     << json.value("address").toObject();
+
         const auto& arr = json.value("phoneNumbers").toArray();
         for(const auto& item : arr){
             PhoneNumbers i;
@@ -76,6 +80,8 @@ struct MainStruct{
     QList<Users> usersList;
 
     void operator<<(const QJsonObject& json){
+
+
         const auto& arr = json.value("users").toArray();
         for(const auto& item : arr){
             Users i;
@@ -94,8 +100,11 @@ class QJsonObject;
 struct StructTemplate
 {
     StructTemplate() {}
+    int thisDataKeyLenMax= -1;
     QList<std::tuple<QJsonValue::Type,QString>> data;
     QString thiskey;
+
+
 
 
     QString toString()const {
@@ -133,33 +142,44 @@ struct StructTemplate
 
     QString funcFormJson()const{
         QString rData;
-        rData += "void operator<<(const QJsonObject& json){ \n";
+        QString table = "\t";
+        rData += table + "void operator<<(const QJsonObject& json){ \n\n";
+
+        table += "\t";
         for(auto item : data){
-            rData += "\t";
+
             const auto& jsonType = std::get<0>(item);
             const auto& name = std::get<1>(item);
 
             QString subStr;
             if(jsonType == QJsonValue::Object){
-                subStr += name + QString(" << json.value(\"%0\").toObject();").arg(name);
+                subStr += table + name + QString(thisDataKeyLenMax-name.length(),' ')
+                          + QString(" << json.value(\"%0\").toObject();").arg(name);
             }
             else if(jsonType == QJsonValue::Array){
 
                 auto itemType = Tools::toUpperCaseCamelCase(name);
-                subStr += QString("const auto& arr = json.value(\"%0\").toArray();\n").arg(name);
-                subStr += QString("for(const auto& item : arr){ \n");
-                subStr += itemType + QString(" i; \n");
-                subStr += QString("i << item.toObject(); \n");
-                subStr += QString("%1 << i; \n}").arg(name+"List");
+                subStr += "\n";
+                subStr += table + QString("const auto& arr = json.value(\"%0\").toArray();\n").arg(name);
+                subStr += table + QString("for(const auto& item : arr){ \n");
+                table  += "\t";
+                subStr += table + itemType + QString(" i; \n");
+                subStr += table + QString("i << item.toObject(); \n");
+                subStr += table + QString("%1 << i; \n").arg(name+"List");
+                table.remove(table.count()-1,1);
+                subStr += table + QString("}");
+
             }
             else{
-                subStr += name + QString(" = json.value(\"%0\").to%1();")
+                subStr += table + name + QString(thisDataKeyLenMax-name.length() + 1 ,' ');
+                subStr += QString("= json.value(\"%0\").to%1();")
                                     .arg(name)
                                     .arg(JsonTypeToConvertType(jsonType));
             }
             rData += subStr + "\n";
         }
-        rData += "}";
+        table.remove(table.count()-1,1);
+        rData += table + "}";
 
         return rData;
     }
@@ -226,11 +246,9 @@ private slots:
 
     void on_pushButton_clicked();
     void on_pushButton_2_clicked();
-
     void on_pushButton_5_clicked();
 
 private:
-    void extracted(QJsonObject &obj, QString &rData);
     void getQtTypeTreeFromJsonObj(const QJsonObject &obj, const QString &thiskey = "");
 
 private:
