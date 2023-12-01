@@ -13,10 +13,12 @@ CONFIG += c++17
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
+    structtest.cpp \
     tools.cpp
 
 HEADERS += \
     mainwindow.h \
+    structtest.h \
     tools.h
 
 FORMS += \

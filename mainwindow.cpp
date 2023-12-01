@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "structtest.h"
 
 
 #include <QCompleter>
@@ -256,7 +257,16 @@ void MainWindow::getQtTypeTreeFromJsonObj(const QJsonObject& obj ,const QString&
             getQtTypeTreeFromJsonObj(obj.value(key).toObject(),structName);
         }
         else if(type == QJsonValue::Array){
-            getQtTypeTreeFromJsonObj(obj.value(key).toArray()[0].toObject(),structName);
+
+            auto subObj = obj.value(key).toArray()[0];
+            if(subObj.type() == QJsonValue::Array){
+                // TODO
+            }else if(subObj.type() == QJsonValue::Object){
+                getQtTypeTreeFromJsonObj(subObj.toObject(),structName);
+            }else{
+                st.arraySubType.insert(QKey,subObj.type());
+            }
+
         }else if(type == QJsonValue::Double){
             auto var = obj.value(key).toDouble();
             if(var - static_cast<int>(var) < 0.00001){
