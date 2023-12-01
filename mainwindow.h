@@ -444,9 +444,11 @@ class QJsonObject;
 struct StructTemplate
 {
     StructTemplate() {qsrand(static_cast<uint>(qrand() + time(nullptr))); }
-    int thisDataKeyLenMax= -1;
+    int thisDataKeyLenMax= -1;      // 参数名最长是（梅花对齐）
+
+    // Json 类型 ，json key ，Qt 中的名字
     QList<std::tuple<QJsonValue::Type,QString,QString>> data;
-    QString thiskey;
+    QString thiskey;    // obj 的名字，对应结构体名称
 
     QString randomSuffix = QString("_") + QString::number(qrand());    // 解决相同名字问题
     bool randomSuffixEnable = true;
