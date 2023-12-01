@@ -211,7 +211,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->textEdit->setText(simpleStr);
+    ui->textEdit->setText(complexStr);
 }
 
 MainWindow::~MainWindow()
@@ -239,10 +239,18 @@ void MainWindow::getQtTypeTreeFromJsonObj(const QJsonObject& obj ,const QString&
 
     int len = -1;
     for(const auto &key : obj.keys()){
+        const QString QKey = key;
 
         QString structName = Tools::toUpperCaseCamelCase(key);
+
+        if(st.randomSuffixEnable){
+            auto &changeQKey = const_cast<QString&>(QKey);
+            changeQKey += st.randomSuffix;
+            structName += st.randomSuffix;
+        }
+
         auto type = obj.value(key).type();
-        if(key.length() > len) len = key.length();
+        if(QKey.length() > len) len = QKey.length();
 
         if(type == QJsonValue::Object){
             getQtTypeTreeFromJsonObj(obj.value(key).toObject(),structName);
@@ -256,12 +264,12 @@ void MainWindow::getQtTypeTreeFromJsonObj(const QJsonObject& obj ,const QString&
             }
         }
 
-        st.data.append({type,key});
+        st.data.append({type,key,QKey});
     }
 
-    auto sortFunc = [](std::tuple<QJsonValue::Type,QString> a1 ,
-                       std::tuple<QJsonValue::Type,QString> a2){
-        return std::get<1>(a1).length() < std::get<1>(a2).length();
+    auto sortFunc = [](std::tuple<QJsonValue::Type,QString,QString> a1 ,
+                       std::tuple<QJsonValue::Type,QString,QString> a2){
+        return std::get<2>(a1).length() < std::get<2>(a2).length();
     };
 
     qSort(st.data.begin(),st.data.end(),sortFunc);
