@@ -47,7 +47,13 @@ static const QString complexStr(R"(
         "selfLink": "/api/v1/complex-data?page=1&perPage=10",
         "totalItems": 3,
         "totalPages": 1,
-        "version": 1
+        "version": 1,
+        "testTheList":[
+            [["s","s"],["s","s"]],[["s","s"],["s","s"]]
+        ],
+        "testTheList2":[
+            [{"key":1,"key2":true},{}],[{},{}]
+        ]
     },
     "company": {
         "departments": [
@@ -239,10 +245,11 @@ void MainWindow::getQtTypeTreeFromJsonObj(const QJsonObject& obj ,const QString&
     st.thiskey = thiskey;
 
     int len = -1;
-    for(const auto &key : obj.keys()){
-        const QString QKey = key;
+    for(const auto &Itemkey : obj.keys()){
+        const QString key = Itemkey;
+        const QString QKey = Tools::namingCheck(key);
 
-        QString structName = Tools::toUpperCaseCamelCase(key);
+        QString structName = Tools::toUpperCaseCamelCase(QKey);
 
         if(st.randomSuffixEnable){
             auto &changeQKey = const_cast<QString&>(QKey);
@@ -258,14 +265,27 @@ void MainWindow::getQtTypeTreeFromJsonObj(const QJsonObject& obj ,const QString&
         }
         else if(type == QJsonValue::Array){
 
-            auto subObj = obj.value(key).toArray()[0];
+            auto subObj = obj.value(key).toArray().at(0);
             if(subObj.type() == QJsonValue::Array){
-                // TODO
+                st.arrayNestedLayers.insert(QKey,1);
+                auto tempObj = subObj;
+                while(tempObj.toArray().at(0).type() == QJsonValue::Array){
+                    tempObj = tempObj.toArray().at(0);
+                    int curLay = st.arrayNestedLayers.value(QKey);
+                    curLay++;
+                    st.arrayNestedLayers.insert(QKey,curLay);
+                }
+
+                if(tempObj.toArray().at(0).type() == QJsonValue::Object){
+                    getQtTypeTreeFromJsonObj(tempObj.toArray().at(0).toObject(),structName);
+                }
+                subObj = tempObj.toArray().at(0);
+
             }else if(subObj.type() == QJsonValue::Object){
-                getQtTypeTreeFromJsonObj(subObj.toObject(),structName);
-            }else{
-                st.arraySubType.insert(QKey,subObj.type());
+                getQtTypeTreeFromJsonObj(subObj.toObject(),structName); 
             }
+
+            st.arraySubType.insert(QKey,subObj.type());
 
         }else if(type == QJsonValue::Double){
             auto var = obj.value(key).toDouble();
@@ -309,8 +329,8 @@ void MainWindow::on_pushButton_5_clicked()
     auto jsonStr = ui->textEdit->toPlainText();
     auto jsonObj = (QJsonDocument().fromJson(jsonStr.toLatin1())).object();
 
-    MainStruct i ;
-    i << jsonObj;
+//    MainStruct i ;
+//    i << jsonObj;
 
     qDebug()<<__FUNCTION__;
 }

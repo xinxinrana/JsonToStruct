@@ -33,6 +33,7 @@ struct StructTemplate
     // Json 类型 ，json key ，Qt 中的名字
     QList<std::tuple<QJsonValue::Type,QString,QString>> data;
     QMap<QString,QJsonValue::Type> arraySubType;
+    QMap<QString,int> arrayNestedLayers ;
     QString thiskey;    // obj 的名字，对应结构体名称
 
     QString randomSuffix = QString("_") + QString::number(qrand());    // 解决相同名字问题
@@ -61,19 +62,29 @@ struct StructTemplate
             }
             else if(jsonType == QJsonValue::Array){
 
-                if(arraySubType.value(name) == QJsonValue::Array){
+                if(arrayNestedLayers.contains(name)){
+                    auto lay = arrayNestedLayers.value(name);
+                    auto InnerLayerType = JsonTypeToQType(arraySubType.value(name));
+                    QString subType = "%1";
+                    for(int i = 0 ; i < lay ; ++i){
+                        subType = subType.arg("QList<%1>");
+                    }
 
+                    if(arraySubType.value(name) == QJsonValue::Object){
+                        itemType = subType.arg(Tools::toUpperCaseCamelCase(name));
+                    }else{
+                        itemType = subType.arg(InnerLayerType);
+                    }
                 }
-
                 else if(arraySubType.value(name) == QJsonValue::Object){
                     itemType = Tools::toUpperCaseCamelCase(name);
-                    itemName = name + "List";
-                    itemType = QString("QList<%1>").arg(itemType);
-                }else{
-                    itemType = JsonTypeToQType(arraySubType.value(name));
-                    itemName = name + "List";
-                    itemType = QString("QList<%1>").arg(itemType);
                 }
+                else{
+                    itemType = JsonTypeToQType(arraySubType.value(name));
+                }
+
+                itemName = name + "List";
+                itemType = QString("QList<%1>").arg(itemType);
 
 
             }else{
@@ -109,6 +120,7 @@ struct StructTemplate
 
 
             QString subStr;
+
             if(jsonType == QJsonValue::Object){
                 subStr += table + qName + QString(thisDataKeyLenMax-name.length(),' ')
                           + QString(" << json.value(\"%0\").toObject();").arg(name);
@@ -120,7 +132,25 @@ struct StructTemplate
                 subStr += table + QString("const auto& arr%0 = json.value(\"%0\").toArray();\n").arg(name);
                 subStr += table + QString("for(const auto& item : arr%0){ \n").arg(name);
                 table  += "\t";
-                if(arraySubType.value(qName) ==  QJsonValue::Object){
+                if(arrayNestedLayers.contains(qName)){
+                    // TODO 主要解决   像 QList<QList<QList<QString>>> 的赋值问题；
+                    // 暂时先不管 过编译为主
+                    auto lay = arrayNestedLayers.value(qName);
+                    auto InnerLayerType = JsonTypeToQType(arraySubType.value(qName));
+                    QString subType = "%1";
+                    for(int i = 1 ; i < lay ; ++i){
+                        subType = subType.arg("QList<%1>");
+                    }
+
+                    if(arraySubType.value(qName) == QJsonValue::Object){
+                        itemType = subType.arg(Tools::toUpperCaseCamelCase(name));
+                    }else{
+                        itemType = subType.arg(InnerLayerType);
+                    }
+
+                    subStr += table + itemType + QString(" i; \n");
+                }
+                else if(arraySubType.value(qName) ==  QJsonValue::Object){
                     subStr += table + itemType + QString(" i; \n");
                     subStr += table + QString("i << item.toObject(); \n");
                 }else{

@@ -8,6 +8,20 @@ Tools::Tools()
 
 }
 
+QString Tools::namingCheck(const QString &str, bool *isOk)
+{
+    auto t1 = toUpperCaseCamelCase(str);
+    auto t2 = toLowerCaseCamelCase(str);
+
+    if(t1 == t2){
+        if(isOk) (*isOk) = false;
+        return QString("Temp") + str;
+    }
+    if(isOk) (*isOk) = true;
+    return str;
+}
+
+
 QString Tools::toUpperCaseCamelCase(const QString &str)
 {
     // 将字符串分割为单词
