@@ -247,7 +247,7 @@ void MainWindow::getQtTypeTreeFromJsonObj(const QJsonObject& obj ,const QString&
     int len = -1;
     for(const auto &Itemkey : obj.keys()){
         const QString key = Itemkey;
-        const QString QKey = Tools::namingCheck(key);
+        const QString QKey = Tools::toLowerCaseCamelCase(Tools::namingCheck(key));
 
         QString structName = Tools::toUpperCaseCamelCase(QKey);
 

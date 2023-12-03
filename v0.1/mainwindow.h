@@ -122,8 +122,8 @@ struct StructTemplate
             QString subStr;
 
             if(jsonType == QJsonValue::Object){
-                subStr += table + qName + QString(thisDataKeyLenMax-name.length(),' ')
-                          + QString(" << json.value(\"%0\").toObject();").arg(name);
+                subStr += table + qName + QString(thisDataKeyLenMax-name.length() + 1 ,' ');
+                subStr += QString("<< json.value(\"%0\").toObject();").arg(name);
             }
             else if(jsonType == QJsonValue::Array){
 
