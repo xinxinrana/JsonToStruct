@@ -49,10 +49,10 @@ static const QString complexStr(R"(
         "totalPages": 1,
         "version": 1,
         "testTheList":[
-            [["s","s"],["s","s"]],[["s","s"],["s","s"]]
+            [["s1","s2"],["s12","s21"]],[["s222","sxxx"],["s12","sc"]]
         ],
         "testTheList2":[
-            [{"key":1,"key2":true},{}],[{},{}]
+            [{"key":1,"key2":true},{"key":1,"key2":false}],[{"key":100,"key2":true},{"key":20,"key2":false}]
         ]
     },
     "company": {
@@ -329,8 +329,8 @@ void MainWindow::on_pushButton_5_clicked()
     auto jsonStr = ui->textEdit->toPlainText();
     auto jsonObj = (QJsonDocument().fromJson(jsonStr.toLatin1())).object();
 
-//    MainStruct i ;
-//    i << jsonObj;
+    MainStruct i ;
+    i << jsonObj;
 
     qDebug()<<__FUNCTION__;
 }

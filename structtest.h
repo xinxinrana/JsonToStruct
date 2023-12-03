@@ -8,6 +8,28 @@
 #include <QJsonArray>
 
 
+template <typename T>
+void setArray(T& arr,const QJsonArray& data)
+{
+    auto item = arr.value(0);
+    for(int i = 0 ; i < data.count() ; ++i){
+        auto curItem = item;
+        setData(curItem ,data.at(i));
+        arr.append(curItem);
+    }
+}
+
+template <typename T>
+void setData(T& arr,const QJsonValue& data){
+    setArray(arr , data.toArray());
+}
+
+void setData(QString& arr,const QJsonValue& data){
+    arr = data.toString();
+}
+
+
+
 struct Delete_28097{
 
     QString href_21089;
@@ -94,6 +116,11 @@ struct TestTheList2_9551{
     }
 };
 
+
+void setData(TestTheList2_9551& arr,const QJsonValue& data){
+    arr << data.toObject();
+}
+
 struct Temp_meta_41{
 
     int version_9551;
@@ -131,66 +158,17 @@ struct Temp_meta_41{
         totalItems_9551        = json.value("totalItems").toInt();
         totalPages_9551        = json.value("totalPages").toInt();
         currentPage_9551       = json.value("currentPage").toInt();
+        previousLink_9551      = json.value("previousLink").toString();
 
 
         // 目标：
         // arrtestTheList ->  QList<QList<QList<QString>>>
 
         const auto& arrtestTheList = json.value("testTheList").toArray();
-
         setArray(testTheList_9551List,arrtestTheList);
-
-
-        previousLink_9551      = json.value("previousLink").toString();
-
-
-
-
-
-
-
-
-//        const auto& arrtestTheList2 = json.value("testTheList2").toArray();
-//        for(const auto& item : arrtestTheList2){
-//            TestTheList2 i;
-//            testTheList2_9551List << i;
-//        }
+        const auto& arrtestTheList2 = json.value("testTheList2").toArray();
+        setArray(testTheList2_9551List,arrtestTheList2);
     }
-
-    template <typename T>
-    void setArray(T& arr,const QJsonArray& data){
-
-        auto item = arr.value(0);
-        for(int i = 0 ; i < data.count() ; ++i){
-            auto curItem = item;
-            if(data.at(i).isArray()){
-                setArray(curItem , data.at(i).toArray());
-            }else{
-                setData(curItem ,data.at(i));
-            }
-
-            arr.append(curItem);
-        }
-    }
-
-    void setArray(QString& arr,const QJsonArray& data){
-
-    }
-
-    template <typename T>
-    void setData(T& arr,const QJsonValue& data){
-
-    }
-
-    void setData(QString& arr,const QJsonValue& data){
-        arr = data.toString();
-    }
-
-    void setData(TestTheList2_9551& arr,const QJsonValue& data){
-        arr << data.toObject();
-    }
-
-
 };
 
 struct Departments_27623{
