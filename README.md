@@ -4,82 +4,89 @@ Generate Qt Struct code snippets and constructors from Json files【从Json文�
 解决后端写一个复杂 json 后 Qt端调用不方便的问题。
 
 生成效果如下：
-```
-struct Address{
+```c++
+struct Address_22551{
 
-	QString city;
+	QString city_18706;
 
-	QString postalCode;
+	QString state_18706;
 
-	QString state;
+	QString street_18706;
 
-	QString street;
+	QString postalCode_18706;
 
-void operator<<(const QJsonObject& json){ 
-	city = json.value("city").toString();
-	postalCode = json.value("postalCode").toString();
-	state = json.value("state").toString();
-	street = json.value("street").toString();
-}
+	void operator<<(const QJsonObject& json){ 
+
+		city_18706             = json.value("city").toString();
+		state_18706            = json.value("state").toString();
+		street_18706           = json.value("street").toString();
+		postalCode_18706       = json.value("postalCode").toString();
+	}
 };
 
-struct PhoneNumbers{
+struct PhoneNumbers_22551{
 
-	QString number;
+	QString type_2041;
 
-	QString type;
+	QString number_2041;
 
-void operator<<(const QJsonObject& json){ 
-	number = json.value("number").toString();
-	type = json.value("type").toString();
-}
+	void operator<<(const QJsonObject& json){ 
+
+		type_2041        = json.value("type").toString();
+		number_2041      = json.value("number").toString();
+	}
 };
 
-struct Users{
+struct Users_41{
 
-	Address address;
+	int id_22551;
 
-	int age;
+	int age_22551;
 
-	QString email;
+	QString name_22551;
 
-	int id;
+	QString email_22551;
 
-	QString name;
+	Address_22551 address_22551;
 
-	QList<PhoneNumbers> phoneNumbersList;
+	QList<PhoneNumbers_22551> phoneNumbers_22551List;
 
-void operator<<(const QJsonObject& json){ 
-	address << json.value("address").toObject();
-	age = json.value("age").toInt();
-	email = json.value("email").toString();
-	id = json.value("id").toInt();
-	name = json.value("name").toString();
-	const auto& arr = json.value("phoneNumbers").toArray();
-for(const auto& item : arr){ 
-PhoneNumbers i; 
-i << item.toObject(); 
-phoneNumbersList << i; 
-}
-}
+	void operator<<(const QJsonObject& json){ 
+
+		id_22551                 = json.value("id").toInt();
+		age_22551                = json.value("age").toInt();
+		name_22551               = json.value("name").toString();
+		email_22551              = json.value("email").toString();
+		address_22551            << json.value("address").toObject();
+
+		const auto& arrphoneNumbers = json.value("phoneNumbers").toArray();
+		for(const auto& item : arrphoneNumbers){ 
+			PhoneNumbers_22551 i; 
+			i << item.toObject(); 
+			phoneNumbers_22551List << i; 
+		}
+	}
 };
 
 struct MainStruct{
 
-	QList<Users> usersList;
+	QList<Users_41> users_41List;
 
-void operator<<(const QJsonObject& json){ 
-	const auto& arr = json.value("users").toArray();
-for(const auto& item : arr){ 
-Users i; 
-i << item.toObject(); 
-usersList << i; 
-}
-}
+	void operator<<(const QJsonObject& json){ 
+
+
+		const auto& arrusers = json.value("users").toArray();
+		for(const auto& item : arrusers){ 
+			Users_41 i; 
+			i << item.toObject(); 
+			users_41List << i; 
+		}
+	}
 };
 
+
 ```
-```
+```json
 测试的Json
 {
   "users": [
